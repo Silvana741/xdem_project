@@ -1,0 +1,6 @@
+jobscript: "slurm-submit.py"
+jobs: 4
+rerun-incomplete: true
+keep-going: true
+latency-wait: 60
+use-conda: true
