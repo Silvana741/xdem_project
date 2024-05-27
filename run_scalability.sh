@@ -1,8 +1,8 @@
 #!/bin/bash -l
 #SBATCH -J XDEMScalability
 #SBATCH --time=0-2:00:00
-#SBATCH -N 32
-#SBATCH -n 4096
+#SBATCH -N 8
+#SBATCH -n 1024
 #SBATCH -c 1
 #SBATCH --hint=nomultithread
 #SBATCH --exclusive
@@ -10,7 +10,7 @@
 #SBATCH --qos normal
 #SBATCH --output SLURM_%x_%j.log
 #SBATCH --error SLURM_%x_%j.log
-#SBATCH --chdir=/home/users/sbelegu/hpcs_project/project1-workflow_XDEM_scalability/test-run
+#SBATCH --chdir=/work/projects/mhpc-softenv/project1-workflow_XDEM_scalability/test-run
 
 echo "== Starting run at $(date)"
 echo "== Job ID: ${SLURM_JOBID}"
@@ -38,9 +38,7 @@ XDEM_INPUT="${TESTCASE_DIR}/blastFurnaceCharging-5.5M-middle-nocheckpoint.h5"
 PARTITIONER="ORB"  # Partitioner: ORB Zoltan-RCB Zoltan-RIB METIS SCOTCH
 NT=4               # Number of threads per process
 
-nodes_array=(1 2 3 4 5 6 7 8 10 12 14 16 18 20 22 24 26 28 30 32)
-
-for NN in "${nodes_array[@]}" ; do
+for NN in $(seq 1 ${SLURM_NNODES}) ; do
 
     # NT -> number of threads, NN -> number of nodes, NP -> number of processes, NC -> number of cores
     NC=$(( $NN * 128 ))
@@ -76,7 +74,7 @@ done
 
 # Generate strong scalability plots
 PLOT_LOG="${RUN_DIR}/output_plot_strong_scalability.log"
-PLOT_SCRIPT_ARGS=$(for N in "${nodes_array[@]}" ; do echo -n "--nnodes=$N:$(ls output_NN$N-*/blastFurnaceCharging-5.5M-middle-nocheckpoint_allranks.h5) " ; done)
+PLOT_SCRIPT_ARGS=$(for N in $(seq 1 8) ; do echo -n "--nnodes=$N:$(ls output_NN$N-*/blastFurnaceCharging-5.5M-middle-nocheckpoint_allranks.h5) " ; done)
 echo "PLOT_SCRIPT_ARGS = ${PLOT_SCRIPT_ARGS}"
 "${JOB_DIR}/plot_strong_scalability.R" ${PLOT_SCRIPT_ARGS} &> "${PLOT_LOG}"
 
