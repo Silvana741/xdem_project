@@ -47,6 +47,9 @@ rule cleanup_output:
         repack_script="scripts/h5repack_inplace.sh"
     shell:
         """
+        module use /work/projects/mhpc-softenv/easybuild/aion-epyc-prod-2023a/modules/all/
+        module load data/h5py/3.9.0-foss-2023a
+        module load data/R-bundle-XDEM/20230721-foss-2023a-R-4.3.1
         set -euo pipefail  # Enable strict mode and exit on error
         
         echo "Cleaning up output files..."
@@ -76,8 +79,15 @@ rule generate_plots:
         plot_script="scripts/plot_strong_scalability.R"
     shell:
         """
-        PLOT_SCRIPT_ARGS={input}
+        module use /work/projects/mhpc-softenv/easybuild/aion-epyc-prod-2023a/modules/all/
+        module load cae/XDEM/master-20240425-52cc25a6-foss-2023a-MPIOMP
+        module load data/h5py/3.9.0-foss-2023a
+        module load data/R-bundle-XDEM/20230721-foss-2023a-R-4.3.1
+
+        PLOT_SCRIPT_ARGS=$(for N in 1; do echo -n "--nnodes=$N:$(ls output/cleaned_blastFurnaceCharging-5.5M-middle-nocheckpoint_allranks.h5) "; done)
         {params.plot_script} $PLOT_SCRIPT_ARGS &> {output}
         """
+
+
 
 
