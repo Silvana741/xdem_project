@@ -1,9 +1,12 @@
 xdem_root_dir: "/work/projects/mhpc-softenv/easybuild/aion-epyc-prod-2023a/software/XDEM/master-20240425-52cc25a6-foss-2023a-MPIOMP"
-testcase_dir: "../testcases/BlastFurnaceCharging-5.5M"
 xdem_driver: "/work/projects/mhpc-softenv/easybuild/aion-epyc-prod-2023a/software/XDEM/master-20240425-52cc25a6-foss-2023a-MPIOMP/bin/XDEM_Simulation_Driver" 
-xdem_input: "../testcases/BlastFurnaceCharging-5.5M/blastFurnaceCharging-5.5M-middle-nocheckpoint.h5"
+xdem_input: "testcases/BlastFurnaceCharging-5.5M/blastFurnaceCharging-5.5M-middle-nocheckpoint.h5"
 partitioner: "ORB"
 nt: 4
+nn: 1
+nc: 128
+np: 32
 max_iterations: 1000
-job_dir: "../test-run"
-num_nodes: 4
+job_dir: "test-run/"
+output_dir: "output/"
+output_log: "test-run/NN{nn}-NC{nc}-NP{np}-NT{nt}-Partitioner{par}.log"
