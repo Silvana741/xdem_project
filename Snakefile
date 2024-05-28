@@ -4,12 +4,13 @@ def format_output_log(config):
     log_path = config["output_log"].format(nn=config["nn"], nc=config["nc"], np=config["np"], nt=config["nt"], par=config["partitioner"])
     print(f"Formatted output log path: {log_path}")  # Debugging statement
     return log_path
-
+        
 rule run_xdem_driver:
     input:
         xdem_input=config["xdem_input"]
     output:
-        log=format_output_log(config)
+        log=format_output_log(config),
+        results="output/blastFurnaceCharging-5.5M-middle-nocheckpoint_allranks.h5"
     params:
         nt=config["nt"],
         nn=config["nn"],
@@ -38,8 +39,7 @@ rule run_xdem_driver:
 
 rule cleanup_output:
     input:
-        format_output_log(config),
-        results="output/blastFurnaceCharging-5.5M-middle-nocheckpoint_allranks.h5"
+        path=format_output_log(config)
     output:
         cleaned_results="output/cleaned_blastFurnaceCharging-5.5M-middle-nocheckpoint_allranks.h5"
     params:
@@ -47,9 +47,24 @@ rule cleanup_output:
         repack_script="scripts/h5repack_inplace.sh"
     shell:
         """
-        {params.delete_script} {input.results}
-        {params.repack_script} {input.results}
-        mv {input.results} {output.cleaned_results}
+        set -euo pipefail  # Enable strict mode and exit on error
+        
+        echo "Cleaning up output files..."
+        find "output" \( -name '*.xdmf' -o -name '*_rank-*.*' -o -name '*.dat' \) -delete
+        echo "Deleted intermediate files."
+
+        input_file="output/blastFurnaceCharging-5.5M-middle-nocheckpoint_allranks.h5"
+        echo "Running delete script on input_file..."
+        {params.delete_script} $input_file
+        echo "Delete script finished."
+
+        echo "Running repack script on input_file..."
+        {params.repack_script} $input_file
+        echo "Repack script finished."
+
+        echo "Copying cleaned file to output directory..."
+        cp $input_file {output.cleaned_results}
+        echo "File copied to {output.cleaned_results}."
         """
 
 rule generate_plots:
