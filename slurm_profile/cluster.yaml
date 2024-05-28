@@ -1,22 +1,18 @@
 __default__:
   time: "02:00:00"
-  nodes: 4
-  ntasks: 512
+  nodes: 1
+  ntasks: 128
   cpus-per-task: 1
   partition: "batch"
   qos: "normal"
   output: "SLURM_%x_%j.log"
   error: "SLURM_%x_%j.log"
 
-setup_environment:
+run_xdem_driver:
   nodes: 1
-  ntasks: 1
+  ntasks: 128
   cpus-per-task: 1
-
-run_simulation:
-  nodes: 4
-  ntasks: 512
-  cpus-per-task: 1
+  time: 30
 
 cleanup_output:
   nodes: 1
